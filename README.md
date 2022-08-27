@@ -71,3 +71,55 @@ const shuffle = (deck) => [...deck].sort(() => Math.random() - 0.5);
 ```
 
 Массив который мы будем передавать в функцию, не изменит своего порядка, а мы в результате выполнения функции получим новый массив с перемешанными элементами.
+
+
+### cards-manipulate
+### Как работать с картами и получать нужные колоды?
+
+Здесь я не буду рассматривать как получить колоду со всеми картами. Допустим вы её получили, и ваша карта (обьект со свойствами) выглядит так:
+
+```javascript
+{
+  name: 'card1',
+  color: 'green',
+  type: 'hard',
+}
+```
+Ну или похожим образом, в зависимости от того, что у неё в свойствах. А массив со всеми картами, допустим, называется **cards**.
+Тогда, чтобы получить колоду определенных карт, например, всех зеленых, вам не нужно ничего никуда пушить, достаточно использовать метод массивов **filter()** ([подробнее](https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Array/filter))
+
+
+```javascript
+const greenCards = cards.filter(card => card.color === 'green');
+```
+
+Таким же образом можно получить колоду с любым необходимым вам содержимым. Например, все синие карты, кроме синих карт типа easy:
+
+```javascript
+const blueCommonHardCards = cards.filter(card => card.color === 'blue' && card.type !== 'easy');
+```
+
+Чтобы это было еще более читаемым можно использовать предикаты. С последовательной фильтрацией это выглядит так:
+
+```javascript
+const isNotBrown = (card) => card.color !== 'brown';
+const isNotCommon = (card) => card.type !== 'common';
+const greenBlueHardEasyCards = cards.filter(isNotBrown).filter(isNotCommon);
+```
+
+Здесь мы получим все карты, кроме коричневых и карт common (обычного) типа.
+
+#### PS:
+Покажу еще, как можно компоновать предикаты. Но для нашей задачи, где свойств не так уж много, это не нужно:
+
+```javascript
+const multiFilter = (...filters) => (data) => filters.every((f) => f(data));
+
+const isBlue = (card) => card.color === 'blue';
+const isHard = (card) => card.type === 'hard';
+
+const isBlueHard = multiFilter(isBlue, isHard)
+
+const blueHardCards = cards.filter(isBlueHard);
+```
+Таким образом можно компоновать любое количество фильтров, фильтры будут применяться последовательно к элементу данных, пока один из них не вернет false.
