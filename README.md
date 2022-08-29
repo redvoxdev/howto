@@ -2,7 +2,7 @@
 
 ### Как передать информацию о выборе карты в ваш js?
 
-:eyes: [деплой примера](https://redvoxdev.github.io/howto/) :point_left: - информация о выборе выводится в консоль
+:eyes: [demo](https://redvoxdev.github.io/howto/) :point_left: - информация о выборе выводится в консоль
 
 :heavy_exclamation_mark: **Внимание! Считается плохой практикой, но вполне подходит для простых примеров по этой теме**
 
@@ -142,3 +142,65 @@ const blueHardCards = cards.filter(isBlueHard);
 ```
 
 Таким образом можно компоновать любое количество фильтров, фильтры будут применяться последовательно к элементу данных, пока один из них не вернет false.
+
+### debounce
+
+### Как сделать так, чтобы наша карта не нажималась часто?
+
+:eyes: [demo](https://redvoxdev.github.io/howto/debounce) :point_left: код в папке debounce текщего репозитория
+
+#### Пояснения:
+
+Если коротко, то debounce - это функция (декоратор), которая откладывает/запрещает вызов другой функции на какой-то промежуток времени.
+
+```javascript
+function action(event) {
+  event.target.style.backgroundColor = state.getNextColor();
+}
+```
+
+В примере у нас есть функция **action(event)**, которая будет менять цвет карты. Изменение цвета карты должно происходить по нажатию на карту, для этого мы бы могли повесить нашу функцию **action** на событие **click**:
+
+```javascript
+card.addEventListener('click', action);
+```
+
+Но мы не хотим, чтобы на нашу карту нажимали слишком часто. И для этого мы оборачиваем **action** в **debounce**, указывая задержку в милисекундах между нажатиями:
+
+```javascript
+card.addEventListener('click', debounce(action, 500));
+```
+
+Теперь карта будет нажиматься (менять цвет), только когда пройдет 500 мс после предыдущего нажатия.
+
+#### PS:
+
+```javascript
+function debounce(func, ms) {
+  let isCooldown = false;
+  return function(...args) {
+    if (isCooldown) return;
+    func.apply(this, args);
+    isCooldown = true;
+    setTimeout(() => isCooldown = false, ms);
+  };
+}
+```
+Сама функция **debounce** довольно простая.
+```javascript
+return function(...args) {
+```
+В параметры (**args**) возвращаемой из debounce функции, нам приходит событие (**event**)
+```javascript
+if (isCooldown) return;
+```
+На следующей строчке мы проверяем флаг (**isCooldown**), и если он **true** (т.е карта нажималась в предыдущие 500 мс), прерываем выполнение функции **return**'ом.
+В ином случае, мы проходим дальше и вызываем **func** (внутри находится функция action) с аргументами **args** (внутри наш **event**):
+```javascript
+func.apply(this, args);
+```
+После чего мы меняем флаг на **true**. Мы ведь нажали на карту, и теперь она не должна нажиматься какое-то время. Время, которое карта не будет нажиматься, мы устанавливаем с помощью **setTimout**. Через 500 мс флаг снова станет **false**, т.е. наша карта снова станет доступна для нажатия:
+```javascript
+isCooldown = true;
+setTimeout(() => isCooldown = false, ms);
+```
